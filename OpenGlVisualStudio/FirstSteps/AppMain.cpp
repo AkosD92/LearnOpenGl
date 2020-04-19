@@ -84,6 +84,7 @@ float vertices[] = {
 //	1, 2, 3  // second triangle
 //};
 
+
 // For speed computation
 double lastTime = glfwGetTime();
 int nbFrames = 0;
@@ -146,7 +147,8 @@ int main()
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 
-	// note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
+	/*	Note that this is allowed, the call to glVertexAttribPointer registered VBO
+		as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind */
 	//glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	// uncomment this call to draw in wireframe polygons.
@@ -198,7 +200,10 @@ int main()
 
 	viewMatrix = glm::translate(viewMatrix, glm::vec3(0.0f, 0.0f, -3.0f)); // move back the opbject a little in space
 
-	/***************			Render loop				********************/
+
+	/***************************************************************************************************************
+	***											RENDER LOOP														 ***
+	****************************************************************************************************************/
 	while (!glfwWindowShouldClose(AppMain_window))
 	{
 		/********			Measure Speed		***********/
@@ -206,7 +211,6 @@ int main()
 
 		/********			Handle inputs		***********/
 		processInput(AppMain_window, &modelMatrix, &viewMatrix);
-
 
 		/********		Rendering commands		***********/
 		/* Clear color bit from previous iteration*/
@@ -216,20 +220,21 @@ int main()
 		/* Bind Texture */
 		glBindTexture(GL_TEXTURE_2D, texture);
 
+		/* Activate shader*/
 		ourShader.use();
 
 		/*Render image*/	
 		projectionMatrix = glm::perspective(glm::radians(45.0f), (float)MAIN_DISPLAY_WIDTH / (float)MAIN_DISPLAY_HEIGHT, 0.1f, 100.0f);
-		// retrieve the matrix uniform locations
-		unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");
-		unsigned int viewLoc = glGetUniformLocation(ourShader.ID, "view");
-		// pass them to the shaders (3 different ways)
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &viewMatrix[0][0]);
-		// note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
-		ourShader.setMat4("projection", projectionMatrix);
+		
+		/* Note:	currently we set the projection matrix each frame, 
+					but since the projection matrix rarely changes it's often best practice to 
+					set it outside the main loop only once. */
 
-		// render box
+		ourShader.setMat4("projection", projectionMatrix);
+		ourShader.setMat4("view", viewMatrix);
+		ourShader.setMat4("model", modelMatrix);
+
+		// Render box
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
