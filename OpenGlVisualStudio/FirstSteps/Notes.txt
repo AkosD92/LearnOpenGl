@@ -13,3 +13,15 @@ Note for swap buffers:
 Do NOT unbind the EBO while a VAO is active as the bound element buffer object IS stored in the VAO; keep the EBO bound.
 You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
 VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
+
+
+Regarding the FPS counter:
+There is an odd thing in this code. It displays the time, in milliseconds, 
+needed to draw a frame (averaged on 1 second) instead of how many frame were drawn in the last second.
+This is actually much better. Don’t rely on FPS. Never. FramesPerSecond = 1/SecondsPerFrame, 
+so this is an inverse relationship, and we humans suck at understanding this kind of relationship. Let’s take an example.
+You write a great rendering function that runs at 1000 FPS ( 1ms/frame ). 
+But you forgot a little computation in a shader, which adds an extra cost of 0.1ms. And bam, 1/0.0011 = 900. 
+You just lost 100FPS. Morality : never use FPS for performance analysis.
+If you intend to make a 60fps game, your target will be 16.6666ms ; 
+If you intend to make a 30fps game, your target will be 33.3333ms. That’s all you need to know.

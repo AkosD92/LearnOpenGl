@@ -175,13 +175,29 @@ int main()
 	glm::mat4 transform = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
 	
 	// tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
-   // -------------------------------------------------------------------------------------------
+	// -------------------------------------------------------------------------------------------
 	ourShader.use();
 	ourShader.setInt("texture1", 0);
+
+
+	// For speed computation
+	double lastTime = glfwGetTime();
+	int nbFrames = 0;
 
 	/***************			Render loop				********************/
 	while (!glfwWindowShouldClose(AppMain_window))
 	{
+		/********			Measure Speed		***********/
+		double currentTime = glfwGetTime();
+		nbFrames++;
+		if (currentTime - lastTime >= 1.0) { // If last prinf() was more than 1sec ago
+			// printf and reset
+			printf(">>> %f ms/frame\n", 1000.0 / double(nbFrames));
+			nbFrames = 0;
+			lastTime += 1.0;
+		}
+
+
 		/********			Handle inputs		***********/
 		processInput(AppMain_window);
 
