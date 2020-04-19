@@ -3,33 +3,9 @@
 Shader::Shader(const char* vertexPath, const char* fragmentPath)
 {
 	// 1. retrieve the vertex/fragment source code from filePath
-	std::string vertexCode;
-	std::string fragmentCode;
-	std::ifstream vShaderFile;
-	std::ifstream fShaderFile;
-	// ensure ifstream objects can throw exceptions:
-	vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-	fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-	try
-	{
-		// open files
-		vShaderFile.open(vertexPath);
-		fShaderFile.open(fragmentPath);
-		std::stringstream vShaderStream, fShaderStream;
-		// read file's buffer contents into streams
-		vShaderStream << vShaderFile.rdbuf();
-		fShaderStream << fShaderFile.rdbuf();
-		// close file handlers
-		vShaderFile.close();
-		fShaderFile.close();
-		// convert stream into string
-		vertexCode = vShaderStream.str();
-		fragmentCode = fShaderStream.str();
-	}
-	catch (std::ifstream::failure e)
-	{
-		std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
-	}
+	std::string vertexCode = readInShaderFile(vertexPath);
+	std::string fragmentCode = readInShaderFile(fragmentPath);
+	
 	const char* vShaderCode = vertexCode.c_str();
 	const char * fShaderCode = fragmentCode.c_str();
 	// 2. compile shaders
@@ -80,6 +56,8 @@ void Shader::setMat4(const std::string &name, const glm::mat4 &mat) const
 	glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }
 
+
+/* Private Functions*/
 void Shader::checkCompileErrors(unsigned int shader, std::string type)
 {
 	int success;
@@ -102,4 +80,37 @@ void Shader::checkCompileErrors(unsigned int shader, std::string type)
 			std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << "\n ----- " << std::endl;
 		}
 	}
+}
+
+
+std::string Shader::readInShaderFile(std::string argFileName)
+{
+	std::string shaderFileContent;
+	std::ifstream fileStream;
+	std::stringstream stringStream;
+
+	/* Ensure ifstream object can throw exceptions */
+	fileStream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+
+	try
+	{
+		/* Open file*/
+		fileStream.open(argFileName);
+
+		/* Read file's buffer contents into streams*/	
+		stringStream << fileStream.rdbuf();
+
+		/* Close file handler */
+		fileStream.close();
+
+		// convert stream into string
+		shaderFileContent = stringStream.str();
+
+	}
+	catch (std::ifstream::failure e)
+	{
+		std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+	}
+
+	return shaderFileContent;
 }

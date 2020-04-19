@@ -31,6 +31,7 @@ public:
 private:
 	/* Utility function for checking shader compilation/linking errors */
 	void checkCompileErrors(unsigned int shader, std::string type);
+	std::string readInShaderFile(std::string argFileName);
 };
 
 #endif
