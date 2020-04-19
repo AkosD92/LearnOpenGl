@@ -21,15 +21,20 @@
 /******************************************************************************************************************************************
 ***														DEFINITIONS	AND TYPEDEFS														***
 *******************************************************************************************************************************************/
-#define MAIN_DISPLAY_WIDTH 800
-#define MAIN_DISPLAY_HEIGHT 600
+#define MAIN_DISPLAY_WIDTH 1024
+#define MAIN_DISPLAY_HEIGHT 768
+
+#define SENSITIVITY_TRANSFORM (float)0.05f
+#define SENSITIVITY_ROTATE (float)0.05f
+#define SENSITIVITY_SCALE (float)0.05f
 
 /******************************************************************************************************************************************
 ***															DATA AND PROTOTYPES															***
 *******************************************************************************************************************************************/
 /*Callback to adjust rendering window if the display window sizes were modified*/
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow *window);
+void processInput(GLFWwindow *window, glm::mat4* arg_modelMatrix_ptr, glm::mat4* arg_viewMatrix_ptr);
+void printRenderTime();
 
 float vertices[] = {
 		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -79,6 +84,11 @@ float vertices[] = {
 //	1, 2, 3  // second triangle
 //};
 
+// For speed computation
+double lastTime = glfwGetTime();
+int nbFrames = 0;
+
+
 /******************************************************************************************************************************************
 ***																MAIN																	***
 *******************************************************************************************************************************************/
@@ -88,7 +98,7 @@ int main()
 	GLFWwindow* AppMain_window = DispMngr_CreateDisplay(MAIN_DISPLAY_WIDTH, MAIN_DISPLAY_HEIGHT, "OpenGL Window");
 	if (AppMain_window == NULL)
 	{
-		std::cout << "Failed to create GLFW window" << std::endl;
+		std::cout << "[ERROR] >>> Failed to create GLFW window" << std::endl;
 		glfwTerminate();
 		return -1;
 	}
@@ -97,7 +107,7 @@ int main()
 	/*Initialize GLAD to get OS specific function pointers*/
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
-		std::cout << "Failed to initialize GLAD" << std::endl;
+		std::cout << "[ERROR] >>> Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
 
@@ -164,7 +174,7 @@ int main()
 	}
 	else
 	{
-		std::cout << "Failed to load texture" << std::endl;
+		std::cout << "[ERROR] >>> Failed to load texture" << std::endl;
 	}
 	stbi_image_free(data);
 
@@ -180,30 +190,26 @@ int main()
 	ourShader.setInt("texture1", 0);
 
 
-	// For speed computation
-	double lastTime = glfwGetTime();
-	int nbFrames = 0;
+	
+	// create transformations
+	glm::mat4 modelMatrix = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+	glm::mat4 viewMatrix = glm::mat4(1.0f);
+	glm::mat4 projectionMatrix = glm::mat4(1.0f);
+
+	viewMatrix = glm::translate(viewMatrix, glm::vec3(0.0f, 0.0f, -3.0f)); // move back the opbject a little in space
 
 	/***************			Render loop				********************/
 	while (!glfwWindowShouldClose(AppMain_window))
 	{
 		/********			Measure Speed		***********/
-		double currentTime = glfwGetTime();
-		nbFrames++;
-		if (currentTime - lastTime >= 1.0) { // If last prinf() was more than 1sec ago
-			// printf and reset
-			printf(">>> %f ms/frame\n", 1000.0 / double(nbFrames));
-			nbFrames = 0;
-			lastTime += 1.0;
-		}
-
+		printRenderTime();
 
 		/********			Handle inputs		***********/
-		processInput(AppMain_window);
+		processInput(AppMain_window, &modelMatrix, &viewMatrix);
 
 
 		/********		Rendering commands		***********/
-		/*Clear color bit from previous iteration*/
+		/* Clear color bit from previous iteration*/
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -212,22 +218,16 @@ int main()
 
 		ourShader.use();
 
-		/*Render image*/
-		// create transformations
-		glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-		glm::mat4 view = glm::mat4(1.0f);
-		glm::mat4 projection = glm::mat4(1.0f);
-		model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-		projection = glm::perspective(glm::radians(45.0f), (float)MAIN_DISPLAY_WIDTH / (float)MAIN_DISPLAY_HEIGHT, 0.1f, 100.0f);
+		/*Render image*/	
+		projectionMatrix = glm::perspective(glm::radians(45.0f), (float)MAIN_DISPLAY_WIDTH / (float)MAIN_DISPLAY_HEIGHT, 0.1f, 100.0f);
 		// retrieve the matrix uniform locations
 		unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");
 		unsigned int viewLoc = glGetUniformLocation(ourShader.ID, "view");
 		// pass them to the shaders (3 different ways)
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &viewMatrix[0][0]);
 		// note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
-		ourShader.setMat4("projection", projection);
+		ourShader.setMat4("projection", projectionMatrix);
 
 		// render box
 		glBindVertexArray(VAO);
@@ -258,11 +258,34 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	glViewport(0, 0, width, height);
 }
 
-void processInput(GLFWwindow *window)
+void processInput(GLFWwindow *window,  glm::mat4* arg_modelMatrix_ptr, glm::mat4* arg_viewMatrix_ptr)
 {
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-	{
-		glfwSetWindowShouldClose(window, true);
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){glfwSetWindowShouldClose(window, true);}
+	if (glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS){*arg_viewMatrix_ptr = glm::translate(*arg_viewMatrix_ptr, glm::vec3(0.0f, 0.0f, -SENSITIVITY_SCALE));}
+	if (glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS){*arg_viewMatrix_ptr = glm::translate(*arg_viewMatrix_ptr, glm::vec3(0.0f, 0.0f, SENSITIVITY_SCALE));}
+	if (glfwGetKey(window, GLFW_KEY_KP_4) == GLFW_PRESS){*arg_viewMatrix_ptr = glm::translate(*arg_viewMatrix_ptr, glm::vec3(-SENSITIVITY_TRANSFORM, 0.0f, 0.0f));}
+	if (glfwGetKey(window, GLFW_KEY_KP_6) == GLFW_PRESS){*arg_viewMatrix_ptr = glm::translate(*arg_viewMatrix_ptr, glm::vec3(SENSITIVITY_TRANSFORM, 0.0f, 0.0f));}
+	if (glfwGetKey(window, GLFW_KEY_KP_8) == GLFW_PRESS){*arg_viewMatrix_ptr = glm::translate(*arg_viewMatrix_ptr, glm::vec3(0.0f, SENSITIVITY_TRANSFORM, 0.0f));}
+	if (glfwGetKey(window, GLFW_KEY_KP_2) == GLFW_PRESS){*arg_viewMatrix_ptr = glm::translate(*arg_viewMatrix_ptr, glm::vec3(0.0f, -SENSITIVITY_TRANSFORM, 0.0f));}
+	if (glfwGetKey(window, GLFW_KEY_KP_MULTIPLY) == GLFW_PRESS) { *arg_modelMatrix_ptr = glm::rotate(*arg_modelMatrix_ptr, SENSITIVITY_ROTATE, glm::vec3(0.0f, 1.0f, 0.0f));}
+	if (glfwGetKey(window, GLFW_KEY_KP_DIVIDE) == GLFW_PRESS) { *arg_modelMatrix_ptr = glm::rotate(*arg_modelMatrix_ptr, SENSITIVITY_ROTATE, glm::vec3(1.0f, 0.0f, 0.0f));}
+
+	if (glfwGetKey(window, GLFW_KEY_KP_0) == GLFW_PRESS) 
+	{ 
+		*arg_modelMatrix_ptr = glm::mat4(1.0f);
+		*arg_viewMatrix_ptr = glm::mat4(1.0f);
+		*arg_viewMatrix_ptr = glm::translate(*arg_viewMatrix_ptr, glm::vec3(0.0f, 0.0f, -3.0f));
 	}
 }
 
+void printRenderTime()
+{
+	double currentTime = glfwGetTime();
+	nbFrames++;
+	if (currentTime - lastTime >= 1.0) { // If last prinf() was more than 1sec ago
+		// printf and reset
+		printf("[DIAG] >>> %f ms/frame\n", 1000.0 / double(nbFrames));
+		nbFrames = 0;
+		lastTime += 1.0;
+	}
+}
