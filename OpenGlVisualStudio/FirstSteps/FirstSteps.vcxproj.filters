@@ -15,19 +15,19 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AppMain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DisplayManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\glad\src\glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="stb_image.cpp">
+    <ClCompile Include="src\AppMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Shader.cpp">
+    <ClCompile Include="src\DisplayManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stb_image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -35,22 +35,22 @@
     <ClInclude Include="..\glad\include\glad\glad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DisplayManager.h">
+    <ClInclude Include="src\DisplayManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Shader.h">
+    <ClInclude Include="src\Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="stb_image.h">
+    <ClInclude Include="src\stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="FragmentShader.glsl" />
-    <None Include="VertexShader.glsl" />
+    <None Include="shaders\VertexShader.glsl" />
+    <None Include="shaders\FragmentShader.glsl" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="Snippets.txt" />
-    <Text Include="Notes.txt" />
+    <Text Include="notes\Snippets.txt" />
+    <Text Include="notes\Notes.txt" />
   </ItemGroup>
 </Project>

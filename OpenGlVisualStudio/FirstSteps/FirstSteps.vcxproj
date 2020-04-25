@@ -129,24 +129,24 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\glad\src\glad.c" />
-    <ClCompile Include="AppMain.cpp" />
-    <ClCompile Include="DisplayManager.cpp" />
-    <ClCompile Include="Shader.cpp" />
-    <ClCompile Include="stb_image.cpp" />
+    <ClCompile Include="src\AppMain.cpp" />
+    <ClCompile Include="src\DisplayManager.cpp" />
+    <ClCompile Include="src\Shader.cpp" />
+    <ClCompile Include="src\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\glad\include\glad\glad.h" />
-    <ClInclude Include="DisplayManager.h" />
-    <ClInclude Include="Shader.h" />
-    <ClInclude Include="stb_image.h" />
+    <ClInclude Include="src\DisplayManager.h" />
+    <ClInclude Include="src\Shader.h" />
+    <ClInclude Include="src\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="FragmentShader.glsl" />
-    <None Include="VertexShader.glsl" />
+    <None Include="shaders\FragmentShader.glsl" />
+    <None Include="shaders\VertexShader.glsl" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="Notes.txt" />
-    <Text Include="Snippets.txt" />
+    <Text Include="notes\Notes.txt" />
+    <Text Include="notes\Snippets.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

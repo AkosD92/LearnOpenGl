@@ -10,7 +10,6 @@
 #include "stb_image.h"
 
 #include "DisplayManager.h"
-//#include "ShaderHandler.h"
 #include "Shader.h"
 
 #include <glm/glm.hpp>
@@ -123,7 +122,7 @@ int main()
 
 
 	/**********		Build and compile our shader program		***********/
-	Shader ourShader("VertexShader.glsl", "FragmentShader.glsl");
+	Shader ourShader("shaders/VertexShader.glsl", "shaders/FragmentShader.glsl");
 
 	unsigned int VBO, VAO;// , EBO;
 	glGenVertexArrays(1, &VAO);
@@ -168,7 +167,7 @@ int main()
 	// load image, create texture and generate mipmaps
 	int width, height, nrChannels;
 	// The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
-	unsigned char *data = stbi_load("../res/texture_rock.jpg", &width, &height, &nrChannels, 0);
+	unsigned char *data = stbi_load("res/texture_rock.jpg", &width, &height, &nrChannels, 0);
 	if (data)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -198,7 +197,7 @@ int main()
 	glm::mat4 viewMatrix = glm::mat4(1.0f);
 	glm::mat4 projectionMatrix = glm::mat4(1.0f);
 
-	viewMatrix = glm::translate(viewMatrix, glm::vec3(0.0f, 0.0f, -3.0f)); // move back the opbject a little in space
+	viewMatrix = glm::translate(viewMatrix, glm::vec3(0.0f, 0.0f, -3.0f)); // move back the object a little in space
 
 
 	/***************************************************************************************************************
