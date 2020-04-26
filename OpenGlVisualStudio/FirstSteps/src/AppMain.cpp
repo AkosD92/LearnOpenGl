@@ -23,9 +23,9 @@
 #define MAIN_DISPLAY_WIDTH 1024
 #define MAIN_DISPLAY_HEIGHT 768
 
-#define SENSITIVITY_TRANSFORM (float)0.05f
-#define SENSITIVITY_ROTATE (float)0.05f
-#define SENSITIVITY_SCALE (float)0.05f
+float SENSITIVITY_TRANSFORM = 0.05f;
+float SENSITIVITY_ROTATE = 0.05f;
+float SENSITIVITY_SCALE = 0.05f;
 
 /******************************************************************************************************************************************
 ***															DATA AND PROTOTYPES															***
